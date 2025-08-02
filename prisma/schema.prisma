@@ -1,0 +1,123 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Accounts {
+  accountId    Int         @id @default(autoincrement()) @map("accountId")
+  userId       String      @unique @map("userId")
+  password     String      @map("password")
+ 
+  createdAt    DateTime    @default(now())  @map("createdAt")
+  updatedAt    DateTime    @updatedAt @map("updatedAt")
+  
+  characters Character[]
+  refreshToken RefreshToken?
+
+  @@map("Accounts")
+}
+
+
+
+model Character {
+  characterId    Int        @id @default(autoincrement()) @map("characterId")
+  charactername  String     @unique @map("charactername")
+  accountId      Int        @map("accountId")
+  hp             Int        @default(100)
+  mp             Int        @default(50)
+  attack         Int        @default(10)
+  defense        Int        @default(5)
+  dexterity      Int        @default(5)
+  speed          Int        @default(5)
+  money          Int        @default(10000)
+  createdAt      DateTime   @default(now())    @map("createdAt")
+  updatedAt      DateTime   @updatedAt   @map("updatedAt")
+  
+  account        Accounts   @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
+  inventoryItems Inventory[]
+  equippedItems  CharacterItems[]
+  
+  @@map("Character")
+}
+
+model Items {
+  itemId         Int        @id @default(autoincrement()) @map("itemId")
+  item_code      Int        @unique  @map("item_code")
+  item_name      String     @map("item_name")
+  item_price     Int        @map("item_price")
+  item_stat      Json       @map("item_stat")
+  item_type      String     @map("item_type")
+  description    String?    @map("description")
+  rarity         String     @map("rarity")
+  createdAt      DateTime   @default(now())  @map("createdAt")
+  updatedAt      DateTime   @updatedAt   @map("updatedAt")
+
+  inventoryItems Inventory[]
+  equippedItems  CharacterItems[]
+  itemHistories  ItemHistories[]
+
+  @@map("Items")
+}
+
+model Inventory {
+  invenId     Int       @id @default(autoincrement()) @map("invenId")
+  characterId Int       @map("characterId")
+  item_code   Int       @map("item_code")
+  count    Int       @default(1) @map("count")
+  acquiredAt  DateTime  @default(now()) @map("acquiredAt")
+  
+  character   Character @relation(fields: [characterId], references: [characterId], onDelete: Cascade)
+  items        Items      @relation(fields: [item_code], references: [item_code] )
+
+  @@unique([characterId, item_code])
+
+  @@map("Inventory")
+}
+
+model CharacterItems {
+  characterItemId          Int       @id @default(autoincrement()) @map("characterItemId")
+  characterId Int   @map("characterId")
+  item_code      Int   @map("item_code")
+  equippedAt  DateTime  @default(now()) @map("equippedAt")
+ 
+  character   Character @relation(fields: [characterId], references: [characterId], onDelete: Cascade)
+  items        Items      @relation(fields: [item_code], references: [item_code] )
+  
+
+  @@unique([characterId, item_code]) // 하나의 캐릭터는 같은 아이템을 여러 번 장착 불가
+
+  @@map("CharacterItems")
+}
+
+model RefreshToken {
+  refTokenid        Int      @id @default(autoincrement()) @map("refTokenid")
+  accountId Int      @unique @map("accountId")
+  token     String   @map("token") 
+  createdAt DateTime @default(now())    @map("createdAt")
+  
+  account   Accounts @relation(fields: [accountId], references: [accountId])
+}
+
+model ItemHistories {
+  itemHistoryId String @id @default(uuid()) @map("itemHistoryId")
+  item_code Int @map("item_code")
+  changedField  String @map("changedField")
+  oldValue      String? @map("oldValue")
+  newValue      String @map("newValue")
+  changedAt     DateTime  @default(now())   @map("changedAt")
+
+  item  Items   @relation(fields: [item_code], references: [item_code])
+  @@map("ItemHistories")
+}
+
