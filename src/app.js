@@ -17,8 +17,6 @@ dotenv.config();
 const app = express();
 const PORT = 3018;
 
-// const ACCESS_TOKEN_SECRET_KEY = process.env.ACCESS_TOKEN_SECRET_KEY;
-// const REFRESH_TOKEN_SECRET_KEY = process.env.REFRESH_TOKEN_SECRET_KEY;
 
 app.use(LogMiddleware);
 app.use(express.json());
