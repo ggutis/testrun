@@ -41,7 +41,7 @@ router.post('/character/:characterId/sales', authMiddleware, async (req, res, ne
     const inventoryItem = await prisma.inventory.findFirst({
       where: {
         characterId: +characterId,
-        itemId: item.itemId,
+        item_code: item.item_code,
       },
     });
 
@@ -53,7 +53,7 @@ router.post('/character/:characterId/sales', authMiddleware, async (req, res, ne
     const equipped = await prisma.characterItems.findFirst({
       where: {
         characterId: +characterId,
-        itemId: item.itemId,
+        item_code: item.item_code,
       },
     });
 
